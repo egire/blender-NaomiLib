@@ -14,14 +14,17 @@ import bpy
 import importlib
 import os
 from . import NLimporter as NLi
+from . import NLexporter as NLe
 from bpy.props import FloatVectorProperty
 from bpy.props import StringProperty, BoolProperty, FloatProperty
-from bpy_extras.io_utils import ImportHelper, path_reference_mode
+from bpy_extras.io_utils import ImportHelper, path_reference_mode, ExportHelper
 import tempfile
 import subprocess
 
 
 importlib.reload(NLi)
+
+importlib.reload(NLe)
 
 
 def import_nl(self, context, filepath: str, bCleanup: bool, bArchive: bool, fScaling: float, bDebug: bool, bOrientation, bNegScale_X: bool):
@@ -34,6 +37,40 @@ def import_nl(self, context, filepath: str, bCleanup: bool, bArchive: bool, fSca
         ret = NLi.main_function_import_file(self, filepath=filepath, scaling=fScaling, debug=bDebug, orientation=bOrientation, NegScale_X=bNegScale_X)
 
     return ret
+
+# export_nl function
+def export_nl(self, context, filepath: str):
+
+    ret = False
+
+    ret = NLe.main_function_export_file(self, filepath)
+
+    return ret
+
+class ExportNL(bpy.types.Operator, ExportHelper):
+    """Export a NaomiLib file"""
+
+    bl_idname = "export_scene.naomilib"
+    bl_label = "Export NL"
+    bl_options = {'PRESET'}
+
+    filename_ext = ".bin",".raw" #.bin or raw supported by SMB
+
+    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
+
+    filter_glob: StringProperty(
+        default="*.bin;*.raw",
+        options={'HIDDEN'},
+        maxlen=255,  # Max internal buffer length, longer would be clamped.
+    )
+
+    def execute(self, context):
+        export_nl(self, context, self.filepath)
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
 
 class ImportNL(bpy.types.Operator, ImportHelper):
     """Import a NaomiLib file"""
@@ -882,10 +919,14 @@ classes = [Naomi_GlobalParam_0, Naomi_GlobalParam_1, COL_PT_collection_gps, Naom
 def menu_func_import(self, context):
     self.layout.operator(ImportNL.bl_idname, text="NaomiLib (.bin / .raw)") #.bin or raw supported by SMB
 
+def menu_func_export(self, context):
+    self.layout.operator(ExportNL.bl_idname, text="NaomiLib Exporter")
+
 def register():
     bpy.utils.register_class(ImportNL)
+    bpy.utils.register_class(ExportNL)
+    bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
     bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
-    #bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
     for cls in classes:
         bpy.utils.register_class(cls)
     bpy.types.Object.naomi_param = bpy.props.PointerProperty(type= Naomi_Param_Properties)
@@ -895,10 +936,12 @@ def register():
     bpy.types.Collection.gp0 = bpy.props.PointerProperty(type= Naomi_GlobalParam_0)
     bpy.types.Collection.gp1 = bpy.props.PointerProperty(type= Naomi_GlobalParam_1)
 
+
 def unregister():
     bpy.utils.unregister_class(ImportNL)
+    bpy.utils.unregister_class(ExportNL)
     bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
-    #bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)
+    bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)
     for cls in classes:
         bpy.utils.unregister_class(cls)
     del bpy.types.Object.naomi_param

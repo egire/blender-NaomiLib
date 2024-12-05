@@ -16,7 +16,8 @@ import struct
 
 from io import BytesIO
 
-file = "../docs/foot.bin"
+file = "C:\mods\doa2\out\hank.bin"
+file1 = "C:\mods\doa2\out\BAS00\model_BAS00_000.bin"
 
 magic_naomilib = b'\x01\x00\x00\x00\x01\x00\x00\x00'
 
@@ -29,7 +30,7 @@ with open(file, "rb") as nlfile:
         print("ERROR: This is not a NaomiLib file!")
         sys.exit()
 
-    nlfile.seek(0x68)
+    nlfile.seek(0x68) # 104 bytes (model header and mesh struct)
 
     meshes = list()
     numChunks = 5 # this is always 5 (?)
@@ -59,4 +60,4 @@ with open(file, "rb") as nlfile:
 
         meshes.append( [vertex, normal, texture_uv] )
 
-    
+    #NN 0N 00 00 NN 00 00 00

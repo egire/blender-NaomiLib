@@ -1,0 +1,21 @@
+{
+  "version": "0.2.1",
+  "tasks": [
+    {
+      "taskLabel": "Build Zip",
+      "appliesTo": "naomiLib_importer/",
+      "type": "default",
+      "command": "tar",
+      "args": [
+        "-acf",
+        "c:\\mods\\naomiLib_importer.zip",
+        "naomiLib_importer"
+      ]
+    },
+    {
+      "taskLabel": "task-naomiLib_importer",
+      "appliesTo": "naomiLib_importer/",
+      "type": "launch"
+    }
+  ]
+}
