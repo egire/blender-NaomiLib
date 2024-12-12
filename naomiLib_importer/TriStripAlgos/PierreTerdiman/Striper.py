@@ -1,51 +1,36 @@
-class CustomArray:
-    def __init__(self, startsize=0, inputbuffer=None):
-        self.data = []
-        self.collapsed = None
 
-    def Store(self, value):
-        self.data.append(value)
-        return self
+from Adjacency import Adjacencies, AdjacenciesCreate
 
-    def Collapse(self):
-        self.collapsed = self.data
-        return self.collapsed
+from CustomArray import CustomArray
 
-    def __del__(self):
-        del self.data
+import numpy as np
 
+sbyte = np.int8
+ubyte = np.uint8
+sword = np.int16
+uword = np.uint16
+sdword = np.int32
+udword = np.uint32
+sqword = np.int64
+uqword = np.uint64
+sfloat = np.float32
 
-class Adjacencies:
+class StriperResult:
     def __init__(self):
-        self.mNbFaces = 0
-        self.mFaces = []
+        self.NbStrips = 0
+        self.StripLengths = None
+        self.StripRuns = None
+        self.AskForWords = False
 
-    def Init(self, create):
-        self.mNbFaces = create.NbFaces
-        self.mFaces = [AdjTriangle() for _ in range(self.mNbFaces)]
-        return True
-
-    def CreateDatabase(self):
-        return True
-
-
-class AdjTriangle:
+class StriperCreate:
     def __init__(self):
-        self.VRef = [0, 0, 0]
-        self.ATri = [0, 0, 0]
-
-    def OppositeVertex(self, vref0, vref1):
-        for v in self.VRef:
-            if v != vref0 and v != vref1:
-                return v
-        return None
-
-    def FindEdge(self, vref0, vref1):
-        for i, (v0, v1) in enumerate(zip(self.VRef, self.VRef[1:] + self.VRef[:1])):
-            if (v0 == vref0 and v1 == vref1) or (v0 == vref1 and v1 == vref0):
-                return i
-        return None
-
+        self.NbFaces = 0
+        self.DFaces = None
+        self.WFaces = None
+        self.AskForWords = False
+        self.OneSided = False
+        self.SGIAlgorithm = False
+        self.ConnectAllStrips = False
 
 class Striper:
     def __init__(self):
@@ -66,12 +51,18 @@ class Striper:
         self.mAdj = None
         return self
 
-    def Init(self, create):
+    def Init(self, create: StriperCreate):
         self.FreeUsedRam()
         self.mAdj = Adjacencies()
-        if not self.mAdj.Init(create):
+        adjCreate = AdjacenciesCreate()
+
+        adjCreate.NbFaces = create.NbFaces
+        adjCreate.DFaces = create.DFaces
+        adjCreate.WFaces = create.WFaces
+
+        if not self.mAdj.init(adjCreate):
             return False
-        if not self.mAdj.CreateDatabase():
+        if not self.mAdj.create_database():
             return False
         self.mAskForWords = create.AskForWords
         self.mOneSided = create.OneSided
@@ -125,31 +116,56 @@ class Striper:
         return True
 
     def ComputeBestStrip(self, face):
-        Strip = [None] * 3
-        Faces = [None] * 3
-        Length = [0] * 3
-        FirstLength = [0] * 3
+        Strip = [None] * 3  # Strips computed in the 3 possible directions
+        Faces = [None] * 3  # Faces involved in the 3 previous strips
+        Length = [0] * 3  # Lengths of the 3 previous strips
 
-        Refs0 = [self.mAdj.mFaces[face].VRef[0], self.mAdj.mFaces[face].VRef[2], self.mAdj.mFaces[face].VRef[1]]
-        Refs1 = [self.mAdj.mFaces[face].VRef[1], self.mAdj.mFaces[face].VRef[0], self.mAdj.mFaces[face].VRef[2]]
+        FirstLength = [0] * 3  # Lengths of the first parts of the strips are saved for culling
+
+        Refs0 = [udword()] * 3
+        Refs1 = [udword()] * 3
+
+        Refs0[0] = self.mAdj.mFaces[face].VRef[0]
+        Refs1[0] = self.mAdj.mFaces[face].VRef[1]
+
+	    # Bugfix  self.y Er. Malafeew!
+        Refs0[1] = self.mAdj.mFaces[face].VRef[2]
+        Refs1[1] = self.mAdj.mFaces[face].VRef[0]
+
+        Refs0[2] = self.mAdj.mFaces[face].VRef[1]
+        Refs1[2] = self.mAdj.mFaces[face].VRef[2]
 
         for j in range(3):
-            Strip[j] = [0xFFFFFFFF] * (self.mAdj.mNbFaces + 2 + 1 + 2)
-            Faces[j] = [0xFFFFFFFF] * (self.mAdj.mNbFaces + 2)
-            Tags = self.mTags[:]
+            Strip[j] = np.full((self.mAdj.mNbFaces + 2 + 1 + 2), 0xff, dtype=udword)
+            Faces[j] = np.full((self.mAdj.mNbFaces + 2), 0xff, dtype=udword)
+
+            Tags = self.mTags.copy()
+
             Length[j] = self.TrackStrip(face, Refs0[j], Refs1[j], Strip[j], Faces[j], Tags)
             FirstLength[j] = Length[j]
 
-            Strip[j][:Length[j]] = reversed(Strip[j][:Length[j]])
-            Faces[j][:Length[j] - 2] = reversed(Faces[j][:Length[j] - 2])
+            for i in range(Length[j] // 2):
+                Strip[j][i], Strip[j][Length[j] - i - 1] = Strip[j][Length[j] - i - 1], Strip[j][i]
 
-            NewRef0 = Strip[j][Length[j] - 3]
-            NewRef1 = Strip[j][Length[j] - 2]
+            for i in range((Length[j] - 2) // 2):
+                Faces[j][i], Faces[j][Length[j] - i - 3] = Faces[j][Length[j] - i - 3], Faces[j][i]
+
+            NewRef0 = udword(Strip[j][Length[j] - 3])
+            NewRef1 = udword(Strip[j][Length[j] - 2])
+
             ExtraLength = self.TrackStrip(face, NewRef0, NewRef1, Strip[j][Length[j] - 3:], Faces[j][Length[j] - 3:], Tags)
             Length[j] += ExtraLength - 3
 
-        Longest = max(Length)
-        Best = Length.index(Longest)
+
+        Longest = Length[0]
+        Best = 0
+        if Length[1] > Longest:
+            Longest = Length[1]
+            Best = 1
+        if Length[2] > Longest:
+            Longest = Length[2]
+            Best = 2
+
         NbFaces = Longest - 2
 
         for j in range(Longest - 2):
@@ -159,10 +175,16 @@ class Striper:
             if Longest == 3 or Longest == 4:
                 Strip[Best][1], Strip[Best][2] = Strip[Best][2], Strip[Best][1]
             else:
-                Strip[Best][:Longest] = reversed(Strip[Best][:Longest])
+                # "to reverse the strip, write it in reverse order"
+                for j in range(Longest // 2):
+                    Strip[Best][j], Strip[Best][Longest - j - 1] = Strip[Best][Longest - j - 1], Strip[Best][j]
+
+                # "If the position of the original face in this new reversed strip is odd, you're done"
                 NewPos = Longest - FirstLength[Best]
-                if not NewPos & 1:
-                    Strip[Best].insert(0, Strip[Best][0])
+                if NewPos & 1:
+                    # "Else replicate the first index"
+                    for j in range(Longest, 0, -1):
+                        Strip[Best][j] = Strip[Best][j - 1]
                     Longest += 1
 
         for j in range(Longest):
@@ -176,31 +198,33 @@ class Striper:
         return NbFaces
 
     def TrackStrip(self, face, oldest, middle, strip, faces, tags):
-        Length = 2
-        strip[0] = oldest
-        strip[1] = middle
+        Length = 2  # Initial length is 2 since we have 2 indices in input
+        strip[0] = oldest  # First index of the strip
+        strip[1] = middle  # Second index of the strip
 
         DoTheStrip = True
         while DoTheStrip:
-            Newest = self.mAdj.mFaces[face].OppositeVertex(oldest, middle)
-            strip[Length] = Newest
-            Length += 1
-            faces.append(face)
-            tags[face] = True
+            Newest = self.mAdj.mFaces[face].opposite_vertex(oldest, middle)  # Get the third index of a face given two of them
+            np.append(strip, Newest)  # Extend the strip,...
+            np.append(faces, face)  # ...keep track of the face,...
+            tags[face] = True  # ...and mark it as "done".
 
-            CurEdge = self.mAdj.mFaces[face].FindEdge(middle, Newest)
-            Link = self.mAdj.mFaces[face].ATri[CurEdge]
+            CurEdge = self.mAdj.mFaces[face].find_edge(middle, Newest)  # Get the edge ID...
+
+            Link = self.mAdj.mFaces[face].ATri[CurEdge]  # ...and use it to catch the link to adjacent face.
             if self.IS_BOUNDARY(Link):
-                DoTheStrip = False
+                DoTheStrip = False  # If the face is no more connected, we're done...
             else:
-                face = self.MAKE_ADJ_TRI(Link)
+                face = self.MAKE_ADJ_TRI(Link)  # ...else the link gives us the new face index.
                 if tags[face]:
-                    DoTheStrip = False
-            oldest = middle
+                    DoTheStrip = False  # Is the new face already done?
+            oldest = middle  # Shift the indices and wrap
             middle = Newest
+
         return Length
 
-    def ConnectAllStrips(self, result):
+
+    def ConnectAllStrips(self, result: StriperResult):
         self.mSingleStrip = CustomArray()
         if not self.mSingleStrip:
             return False
@@ -254,26 +278,10 @@ class Striper:
         return True
 
     def IS_BOUNDARY(self, link):
-        return link == 0xFFFFFFFF
+        return link == np.uint32(0xFFFFFFFF)
 
     def MAKE_ADJ_TRI(self, link):
-        return link & 0x3FFFFFFF
+        return link & np.uint32(0x3FFFFFFF)
 
-
-class StriperCreate:
-    def __init__(self):
-        self.NbFaces = 0
-        self.DFaces = None
-        self.WFaces = None
-        self.AskForWords = False
-        self.OneSided = False
-        self.SGIAlgorithm = False
-        self.ConnectAllStrips = False
-
-
-class StriperResult:
-    def __init__(self):
-        self.NbStrips = 0
-        self.StripLengths = None
-        self.StripRuns = None
-        self.AskForWords = False
+    def GET_EDGE_NB(x):
+        return x >> 30

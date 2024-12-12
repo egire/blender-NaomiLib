@@ -24,7 +24,6 @@ def main():
     Strip.Init(sc)
 
     sr = StriperResult()
-    sr.StripRuns = Topology
     Strip.Compute(sr)
 
     print(f"Number of strips: {sr.NbStrips}")

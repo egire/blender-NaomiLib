@@ -12,7 +12,7 @@ zoom_level = -0.5
 wireframe_mode = False
 show_normals = False
 show_vertices = False
-chr_path = 'C:\\mods\\doa2\\out\\BAS00'
+chr_path = 'C:\\Users\\desktop\\source\\repos\\blender-NaomiLib'
 
 current_file = None
 
@@ -221,7 +221,7 @@ def display_options(vertices):
     glDisable(GL_LIGHTING)
     if show_normals:
         glColor3f(1.0, 0.0, 0.0)  # Set color to red
-        glLineWidth(2)
+        glLineWidth(1)
         glBegin(GL_LINES)
         for vertex in vertices:
             vertex = get_indexed_vertex(vertex)
@@ -229,14 +229,14 @@ def display_options(vertices):
             nx, ny, nz = vertex[3], vertex[4], vertex[5]
 
             glVertex3f(x, y, z)
-            glVertex3f(x + nx * 0.05, y + ny * 0.05, z + nz * 0.05)
+            glVertex3f(x + nx * 0.1, y + ny * 0.1, z + nz * 0.1)
         glEnd()
         glLineWidth(1)
         glColor3f(1.0, 1.0, 1.0)  # Set color to red
 
     if show_vertices:
         glColor3f(1.0, 0.0, 0.0)  # Set color to red
-        glPointSize(5)
+        glPointSize(3)
         glBegin(GL_POINTS)
         for vertex in vertices:
             vertex = get_indexed_vertex(vertex)

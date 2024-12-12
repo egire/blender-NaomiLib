@@ -43,8 +43,8 @@ try:
     import pytristrip
 except ImportError:
     pytristrip = None
-    from trianglestripifier import TriangleStripifier
-    from trianglemesh import Mesh
+    from TriStripAlgos.PyFFI.trianglestripifier import TriangleStripifier
+    from TriStripAlgos.PyFFI.trianglemesh import Mesh
 
 def triangulate(strips):
     """A generator for iterating over the faces in a set of
@@ -179,7 +179,7 @@ def stripify(triangles, stitchstrips = False):
         strips = []
         # build a mesh from triangles
         mesh = Mesh()
-        for face in triangles:
+        for i, face in enumerate(triangles):
             try:
                 mesh.add_face(*face)
             except ValueError:

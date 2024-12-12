@@ -73,7 +73,7 @@ class NLReader:
 
         vertices = []
 
-        for i in range(strip_num):
+        for _ in range(strip_num):
             if triangle and not strip:
                 vertices.extend(self.read_vertices(3, 0x20))
             elif tex_shading == -3:

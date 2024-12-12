@@ -50,7 +50,7 @@ output in all circumstances.
 import itertools
 import random # choice
 
-from trianglemesh import Face, Mesh
+from TriStripAlgos.PyFFI.trianglemesh import Face, Mesh
 
 class TriangleStrip(object):
     """A heavily specialized oriented strip of faces.
