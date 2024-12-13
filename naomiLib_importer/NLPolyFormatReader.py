@@ -48,7 +48,6 @@ class NLReader:
 
         gflag_index = self.index
         while self.index - gflag_index < skip_byte_gflag:
-            test = self.index - gflag_index 
             polygon = self.read_polygon(tex_shading)
             model.add_polygon(polygon)
 

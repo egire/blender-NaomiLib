@@ -1,8 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\naomiLib_importer"
+    "\\naomiLib_importer",
+    "\\naomiLib_importer\\TriStripAlgos\\PyFFI"
   ],
-  "SelectedNode": "\\naomiLib_importer\\NLPolyFormatViewer.py",
+  "SelectedNode": "\\naomiLib_importer\\NLPolyFormat.py",
   "PreviewInSolutionExplorer": false
 }

@@ -1,15 +1,5 @@
 #! /usr/bin/env python3
 
-"""
-Created 16.09.2020 18:34 CEST
-
-@author zocker_160
-@comment script for analysing NaomiLib 3D files
-
-this is an implementation of the NaomiLib documentation created by Vincent
-without that, this implementation would be impossible, all credits go to him
-"""
-
 import os
 import sys
 import struct

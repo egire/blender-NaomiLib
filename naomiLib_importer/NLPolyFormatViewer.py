@@ -91,13 +91,19 @@ def render(nl_polyformat_files):
         glRotatef(rotation_y, 0, 1, 0)
 
         for file in nl_polyformat_files:
-            current_file = file
+            glPushMatrix()
+            #center_point = file.center_point
+            radius = file.radius
+            #glTranslatef(center_point[0], center_point[1], center_point[2])
+            glScalef(radius, radius, radius)
             for model in file.models:
                 glPushMatrix()
 
                 # Set model center point
                 center_point = model.mesh_center_point
+                radius = model.mesh_radius
                 glTranslatef(center_point[0], center_point[1], center_point[2])
+                glScalef(radius, radius, radius)
                 if model.tex_pvf_index != 0xFFFFFFFF:
                     texture_file = f'{chr_path}/textures/TexID_{model.tex_pvf_index:03}.bmp'
                     texture_id = load_texture(texture_file)
@@ -108,6 +114,7 @@ def render(nl_polyformat_files):
 
                 draw(model.polygons)
                 glPopMatrix()
+            glPopMatrix()
 
         pygame.display.flip()
         pygame.time.wait(10)

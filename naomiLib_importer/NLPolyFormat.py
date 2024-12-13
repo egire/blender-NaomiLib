@@ -93,7 +93,7 @@ class Polygon:
 
 class Model:
     def __init__(self, parameter_control=None, isp_tsp_instruction=None, tsp_instruction=None, texture_control=None,
-            mesh_center_point=(0xbe4500fe, 0x00000000, 0xb2800000), mesh_radius=0x3f093f5d, tex_pvf_index=0,
+            mesh_center_point=(0xbe4500fe, 0x00000000, 0xb2800000), mesh_radius=0x3f093f5d, tex_pvf_index=-1,
             tex_shading=0, tex_ambient=0x3f400000, face_color=(0x3f800000, 0x3f800000, 0x3f800000, 0x3f800000),
             face_offset_color=(0x00000000, 0x3f800000, 0x3f800000, 0x3f800000), skip_byte_gflag=None):
         
@@ -140,7 +140,7 @@ class Model:
         self.tex_ambient = tex_ambient
         self.face_color = face_color
         self.face_offset_color = face_offset_color
-        self.skip_byte_gflag = self._compute_skipbyte() if skip_byte_gflag else skip_byte_gflag # test this
+        self.skip_byte_gflag = self._compute_skipbyte() if skip_byte_gflag else skip_byte_gflag
 
     def add_polygon(self, polygon):
         self.polygons.append(polygon)
@@ -160,7 +160,7 @@ class Model:
         data += struct.pack('<f', self.mesh_center_point[1])
         data += struct.pack('<f', self.mesh_center_point[2])
         data += struct.pack('<f', self.mesh_radius)
-        data += struct.pack('<I', self.tex_pvf_index)
+        data += struct.pack('<i', self.tex_pvf_index)
         data += struct.pack('<I', self.tex_shading)
         data += struct.pack('<f', self.tex_ambient)
         data += struct.pack('<f', self.face_color[0])
@@ -185,7 +185,7 @@ class Model:
 if __name__ == '__main__':
     from NLPolyFormatReader import NLReader
 
-    file_path = 'model_BAS00_005.bin'
+    file_path = 'sphere.bin'
     nl_reader = NLReader(file_path)
     nl_polyformat = nl_reader.read()
 
@@ -194,4 +194,4 @@ if __name__ == '__main__':
     print(nl_polyformat.get_vertex_count())
 
     # Save to file
-    nl_polyformat.save_to_file('test.bin')
+    nl_polyformat.save_to_file('sphere.bin')
