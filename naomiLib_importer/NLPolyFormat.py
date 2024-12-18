@@ -48,15 +48,20 @@ class NLPolyFormat:
 class Polygon:
     def __init__(self, envmap=0, not_gp=1, gouraud=1, s_index=1, strip=1, triangle=0, sprite=0, culling=2, strip_num=0):
 
+        
+        #  (0<<NL_PF_ENVMAP)+(1<<NL_PF_S_INDEX)+(0<<NL_PF_NOT_GP)+(1<<NL_PF_GOURAUD)+
+        #   (2<<NL_PF_CULLING)+(1<<NL_PF_STRIP)+(0<<NL_PF_TRIANGLE)+(0<<NL_PF_SPRITE), /* gflag */
+        #  4,	/* strip num (2 polygons) */
+
         #gflag
         self.envmap = envmap
+        self.s_index = s_index
         self.not_gp = not_gp
         self.gouraud = gouraud
-        self.s_index = s_index
+        self.culling = culling
         self.strip = strip
         self.triangle = triangle
         self.sprite = sprite
-        self.culling = culling
         self.strip_num = strip_num  # strip count (n vertices per strip -2)
         
         # if NL_PF_NOT_GP is set, the polygon vertex data 

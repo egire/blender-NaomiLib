@@ -92,10 +92,10 @@ def render(nl_polyformat_files):
 
         for file in nl_polyformat_files:
             glPushMatrix()
-            #center_point = file.center_point
-            radius = file.radius
-            #glTranslatef(center_point[0], center_point[1], center_point[2])
-            glScalef(radius, radius, radius)
+            center_point = file.center_point
+            glTranslatef(center_point[0], center_point[1], center_point[2])
+            #radius = file.radius
+            #glScalef(radius, radius, radius)
             for model in file.models:
                 glPushMatrix()
 
@@ -174,7 +174,7 @@ def handle_events():
     if rotate_down:
         rotation_x += 10
 
-def draw(polygons):
+def draw(polygons: NLPolyFormat.Polygon):
     if wireframe_mode:
         glDisable(GL_LIGHTING)
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
@@ -187,41 +187,21 @@ def draw(polygons):
 
         if polygon.triangle:
             glBegin(GL_TRIANGLES)
-            for i in range(len(vertices)):
-                vertex = get_indexed_vertex(vertices[i])
-                x, y, z = vertex[0], vertex[1], vertex[2]
-                nx, ny, nz = vertex[3], vertex[4], vertex[5]
-                u, v = vertex[6], vertex[7]
-
-                glNormal3f(nx, ny, nz)
-                glTexCoord2f(u, v)
-                glVertex3f(x, y, z)
-            glEnd()
         elif polygon.sprite:
             glBegin(GL_QUADS)
-            for i in range(len(vertices)):
-                vertex = get_indexed_vertex(vertices[i])
-                x, y, z = vertex[0], vertex[1], vertex[2]
-                nx, ny, nz = vertex[3], vertex[4], vertex[5]
-                u, v = vertex[6], vertex[7]
-
-                glNormal3f(nx, ny, nz)
-                glTexCoord2f(u, v)
-                glVertex3f(x, y, z)
-            glEnd()
-        else:
+        elif polygon.strip:
             glBegin(GL_TRIANGLE_STRIP)
-            for i in range(len(vertices) - 2):
-                for j in range(3):
-                    vertex = get_indexed_vertex(vertices[i + j])
-                    x, y, z = vertex[0], vertex[1], vertex[2]
-                    nx, ny, nz = vertex[3], vertex[4], vertex[5]
-                    u, v = vertex[6], vertex[7]
 
-                    glNormal3f(nx, ny, nz)
-                    glTexCoord2f(u, v)
-                    glVertex3f(x, y, z)
-            glEnd()
+        for i in range(len(vertices)):
+            vertex = get_indexed_vertex(vertices[i])
+            x, y, z = vertex[0], vertex[1], vertex[2]
+            nx, ny, nz = vertex[3], vertex[4], vertex[5]
+            u, v = vertex[6], vertex[7]
+
+            glNormal3f(nx, ny, nz)
+            glTexCoord2f(u, v)
+            glVertex3f(x, y, z)
+        glEnd()
         display_options(vertices)
 
 def display_options(vertices):

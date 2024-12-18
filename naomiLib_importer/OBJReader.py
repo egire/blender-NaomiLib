@@ -96,9 +96,10 @@ class OBJReader:
         nl_polyformat = NLPolyFormat()
         for obj in self.objects:
             model = Model(None, None, None, None, (0, 0, 0), 1.0, -1, 5, 1.0, (0xFF, 0xFF, 0xFF, 0xFF), (0xFF, 0xFF, 0xFF, 0xFF))
-            polygon = Polygon(0, 1, 1, 1, 1, 0, 0, 1)
-            verts = []
+
             for strip in self.strips[obj]:
+                polygon = Polygon(0, 1, 1, 1, 1, 0, 0, 1)
+                verts = []
                 for j in range(len(strip)):
                     if j >= (len(strip)-3):
                         triangle = (strip[-3], strip[-2], strip[-1])
@@ -136,9 +137,9 @@ class OBJReader:
                     #     normal = self.normals[obj][n] if n is not None else (0, 0, 0)
                     #     uv = self.uvs[obj][t] if t is not None else (0, 0)
                     #     verts.append((vertex[0], vertex[1], vertex[2], normal[0], normal[1], normal[2], uv[0], uv[1]))
-            
-            polygon.set_vertices(verts)
-            model.add_polygon(polygon)
+
+                polygon.set_vertices(verts)
+                model.add_polygon(polygon)
 
             nl_polyformat.add_model(model)
         return nl_polyformat
