@@ -102,7 +102,7 @@ class Model:
         #  (0<<NL_PF_ListType)|(0<<NL_PF_Volume)|(2<<NL_PF_Col_Type)|(1<<NL_PF_Texture)|
         #   (1<<NL_PF_Offset)|(0<<NL_PF_Gouraud)|(0<<NL_PF_16bit_UV)
         if parameter_control is None:
-            parameter_control = 0x80000000 | (0 << 24) | (0 << 23) | (2 << 21) | (1 << 20) | (1 << 19) | (0 << 18) | (0 << 17)
+            parameter_control = 0x80000000 | (0 << 24) | (0 << 6) | (2 << 4) | (1 << 3) | (1 << 2) | (0 << 1) | (0 << 0)
         
         # /* ISP_TSP_instruction */
         # (4<<NL_PF_DepthCompareMode)|(0<<NL_PF_CullingMode)|(0<<NL_PF_ZWriteDisable)|
@@ -118,13 +118,13 @@ class Model:
         #    (0<<NL_PF_SuperSampleTexture)|(4<<NL_PF_MipMapD_adjust)|(1<<NL_PF_TextureShadingInstr)|
         #     (4<<NL_PF_TextureSize_U)|(4<<NL_PF_TextureSize_V)
         if tsp_instruction is None:
-            tsp_instruction = (1 << 31) | (0 << 30) | (0 << 29) | (0 << 28) | (0 << 27) | (0 << 26) | (0 << 25) | (1 << 24) | (0 << 23) | (0 << 22) | (0 << 21) | (0 << 20) | (4 << 19) | (1 << 18) | (0 << 17) | (4 << 16)     
+            tsp_instruction = (1 << 29) | (0 << 26) | (0 << 25) | (0 << 24) | (0 << 22) | (0 << 21) | (0 << 20) | (1 << 19) | (0 << 17) | (0 << 15) | (0 << 13) | (0 << 12) | (4 << 8) | (1 << 6) | (0 << 3) | (4 << 0)     
         
         # /* texture_control */
         # (0<<NL_PF_MIP_Mapped)|(0<<NL_PF_VQ_Compressed)|(1<<NL_PF_PixelFormat)|
         #  (0<<NL_PF_ScanOrder)|(0<<NL_PF_StrideSelect)|(0<<NL_PF_TextureAddress)    
         if texture_control is None:
-            texture_control = (0 << 31) | (0 << 30) | (1 << 29) | (0 << 28) | (0 << 27) | (0 << 26)
+            texture_control = (0 << 31) | (0 << 30) | (1 << 27) | (0 << 26) | (0 << 25) | (0 << 0)
 
         self.polygons = []
         self.all_verts = []

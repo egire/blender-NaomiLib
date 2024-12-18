@@ -115,12 +115,12 @@ class OBJReader:
                             i += 1
                         self.tritoface[obj][triangle] = face_id
 
-                    # Ensure face is counter-clockwise winding
-                    # if self.is_clockwise(self.vertices[obj][face[0][0]], self.vertices[obj][face[1][0]], self.vertices[obj][face[2][0]]):
-                    #     face = (face[0], face[2], face[1])
-
                     face_id = self.lookup_triface(obj, triangle)
                     face = self.faces[obj][face_id]
+
+                    # Ensure face is clockwise winding
+                    if self.is_clockwise(self.vertices[obj][face[0][0]], self.vertices[obj][face[1][0]], self.vertices[obj][face[2][0]]):
+                        face = (face[0], face[2], face[1])
 
                     for fv in face:
                         if strip[j] == fv[0]:
@@ -181,12 +181,12 @@ class OBJReader:
         return dot_product < 0
 
 if __name__ == '__main__':
-    obj_reader = OBJReader('BAS00_03.obj')
+    obj_reader = OBJReader('sphere.obj')
     obj_reader.read()
 
     nl_poly_format = obj_reader._convert_to_nlpolyformat()
 
-    with open('BAS00_03.bin', 'wb') as file:
+    with open('sphere.bin', 'wb') as file:
         file.write(nl_poly_format.pack())
 
     print(f'Conversion of object complete')
